@@ -1,0 +1,25 @@
+{
+  "mcpServers": {
+    "github": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}",
+        "GITHUB_OWNER": "your-github-owner",
+        "GITHUB_REPO": "your-github-repo"
+      }
+    },
+    "filesystem": {
+      "command": "node",
+      "args": [
+        "mcp_server_filesystem.js"
+      ],
+      "env": {
+        "ALLOWED_DIRECTORIES": "/mnt/marzeb-files/personal/marzeb25repo/langchain-agent/docs,/mnt/marzeb-files/personal/marzeb25repo/langchain-agent/reports"
+      }
+    }
+  }
+}

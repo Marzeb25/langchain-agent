@@ -10,15 +10,66 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: #131314;
             color: #e3e3e3;
-            margin: 0;
             display: flex;
             flex-direction: column;
             height: 100vh;
         }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background-color: #1e1f20;
+            border-bottom: 1px solid #2a2a2a;
+            padding: 0 2rem;
+        }
+        
+        .tab-button {
+            padding: 1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #8ab4f8;
+            cursor: pointer;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button:hover {
+            color: #aecbfa;
+        }
+        
+        .tab-button.active {
+            color: #aecbfa;
+            border-bottom-color: #8ab4f8;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none !important;
+            flex: 1;
+            overflow: hidden;
+            flex-direction: column;
+        }
+        
+        .tab-content.active {
+            display: flex !important;
+        }
+        
+        /* Chat Tab */
+        #chat-tab {
+            flex-direction: column;
+        }
+        
         #chat-container {
             flex-grow: 1;
             overflow-y: auto;
@@ -27,10 +78,12 @@
             margin: 0 auto;
             width: 100%;
         }
+        
         .message {
             margin-bottom: 2rem;
             line-height: 1.6;
         }
+        
         .user-message {
             background-color: #1e1f20;
             padding: 1rem 1.5rem;
@@ -38,9 +91,11 @@
             max-width: 80%;
             margin-left: auto;
         }
+        
         .bot-message {
             max-width: 100%;
         }
+        
         .thought-process {
             background-color: #1a1a1a;
             border-left: 4px solid #8ab4f8;
@@ -50,17 +105,21 @@
             font-size: 0.9em;
             color: #a8c7fa;
         }
+        
         .thought-process summary {
             cursor: pointer;
             font-weight: bold;
             outline: none;
         }
+        
+        /* Input Area */
         #input-container {
             padding: 1.5rem;
             background-color: #131314;
             display: flex;
             justify-content: center;
         }
+        
         .input-box {
             display: flex;
             width: 100%;
@@ -69,7 +128,10 @@
             border-radius: 2rem;
             padding: 0.5rem 1rem;
         }
-        input[type="text"] {
+        
+        input[type="text"],
+        input[type="number"],
+        textarea {
             flex-grow: 1;
             background: transparent;
             border: none;
@@ -77,7 +139,19 @@
             font-size: 1rem;
             padding: 0.8rem;
             outline: none;
+            font-family: inherit;
         }
+        
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        input[type="text"]::placeholder,
+        textarea::placeholder {
+            color: #666;
+        }
+        
         button {
             background-color: transparent;
             color: #8ab4f8;
@@ -86,127 +160,661 @@
             font-weight: bold;
             padding: 0 1rem;
             font-size: 1rem;
+            transition: color 0.3s ease;
         }
+        
         button:hover {
             color: #aecbfa;
         }
-        /* Style adjustments for marked.js elements */
-        pre { background-color: #1e1f20; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; }
-        code { font-family: monospace; }
+        
+        button:disabled {
+            color: #444;
+            cursor: not-allowed;
+        }
+        
+        /* PR Analysis Tab */
+        #pr-analysis-tab {
+            flex-direction: column;
+        }
+        
+        .pr-analysis-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            gap: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .pr-input-section {
+            flex: 0 0 30%;
+            background-color: #1e1f20;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        
+        .pr-results-section {
+            flex: 1;
+            background-color: #1e1f20;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #8ab4f8;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            background-color: #0a0a0a;
+            border: 1px solid #2a2a2a;
+            color: #e3e3e3;
+            padding: 0.5rem;
+            border-radius: 0.3rem;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #8ab4f8;
+            background-color: #131314;
+        }
+        
+        .analyze-button {
+            width: 100%;
+            background-color: #8ab4f8;
+            color: #131314;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 0.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .analyze-button:hover:not(:disabled) {
+            background-color: #aecbfa;
+        }
+        
+        .analyze-button:disabled {
+            background-color: #444;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        /* Analysis Results */
+        .analysis-result {
+            margin-bottom: 1.5rem;
+            border: 1px solid #2a2a2a;
+            border-radius: 0.3rem;
+            overflow: hidden;
+        }
+        
+        .result-header {
+            background-color: #0a0a0a;
+            padding: 1rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            color: #8ab4f8;
+        }
+        
+        .result-header:hover {
+            background-color: #1a1a1a;
+        }
+        
+        .result-header.expanded {
+            border-bottom: 1px solid #2a2a2a;
+        }
+        
+        .result-content {
+            display: none;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            background-color: #0a0a0a;
+        }
+        
+        .result-content.expanded {
+            display: block;
+        }
+        
+        .result-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.25rem;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+        
+        .badge-update {
+            background-color: #ffa500;
+            color: #000;
+        }
+        
+        .badge-new {
+            background-color: #4caf50;
+            color: #fff;
+        }
+        
+        /* Status Messages */
+        .status-message {
+            padding: 1rem;
+            border-radius: 0.3rem;
+            margin-bottom: 1rem;
+            background-color: #0a0a0a;
+            border-left: 4px solid #8ab4f8;
+        }
+        
+        .status-message.error {
+            border-left-color: #f44336;
+            color: #f44336;
+        }
+        
+        .status-message.success {
+            border-left-color: #4caf50;
+            color: #4caf50;
+        }
+        
+        /* Approval Section */
+        .approval-section {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #0a0a0a;
+            border-radius: 0.3rem;
+            display: none;
+        }
+        
+        .approval-section.show {
+            display: block;
+        }
+        
+        .checkbox-group {
+            margin-bottom: 1rem;
+        }
+        
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .approval-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .approve-btn,
+        .reject-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border: none;
+            border-radius: 0.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .approve-btn {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .approve-btn:hover:not(:disabled) {
+            background-color: #45a049;
+        }
+        
+        .reject-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .reject-btn:hover:not(:disabled) {
+            background-color: #da190b;
+        }
+        
+        .approve-btn:disabled,
+        .reject-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            border: 2px solid #8ab4f8;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Code blocks */
+        pre {
+            background-color: #0a0a0a;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+        }
+        
+        code {
+            font-family: monospace;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
+    <!-- Tab Navigation -->
+    <div class="tab-navigation">
+        <button class="tab-button active" onclick="switchTab('chat')">💬 Chat</button>
+        <button class="tab-button" onclick="switchTab('pr-analysis')">📋 PR Analysis</button>
+    </div>
 
-    <div id="chat-container"></div>
+    <!-- Chat Tab -->
+    <div id="chat-tab" class="tab-content active">
+        <div id="chat-container"></div>
+        <div id="input-container">
+            <div class="input-box">
+                <input type="text" id="user-input" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
+    </div>
 
-    <div id="input-container">
-        <div class="input-box">
-            <input type="text" id="user-input" placeholder="Ask me anything..." onkeypress="handleKeyPress(event)">
-            <button onclick="sendMessage()">Send</button>
+    <!-- PR Analysis Tab -->
+    <div id="pr-analysis-tab" class="tab-content">
+        <div class="pr-analysis-container">
+            <!-- Input Section -->
+            <div class="pr-input-section">
+                    <h3 style="color: #8ab4f8; margin-bottom: 1rem;">Analyze PR</h3>
+                    
+                    <div class="form-group">
+                        <label>PR URL</label>
+                        <input type="text" id="pr-url" placeholder="e.g., https://github.com/owner/repo/pull/123" />
+                        <small style="color: #888; display: block; margin-top: 0.5rem;">Paste the full GitHub PR URL to analyze</small>
+                    </div>
+                    
+                    <button class="analyze-button" onclick="startPRAnalysis()" id="analyze-btn">
+                        🚀 Analyze PR
+                    </button>
+                </div>
+                
+                <!-- Results Section -->
+                <div class="pr-results-section">
+                    <h3 style="color: #8ab4f8; margin-bottom: 1rem;">Analysis Results</h3>
+                    <div id="analysis-results-container"></div>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        // Configure Marked.js to use Highlight.js for code blocks
-        marked.setOptions({
-            highlight: function(code, lang) {
-                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-                return hljs.highlight(code, { language }).value;
-            }
-        });
-
-        function handleKeyPress(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
+        // ============ Tab Switching ============
+        function switchTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
         }
 
-        async function sendMessage() {
-            const inputField = document.getElementById('user-input');
-            const message = inputField.value.trim();
+        // ============ Chat Functionality ============
+        async function sendChatMessage() {
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value.trim();
+            
             if (!message) return;
-
-            const chatContainer = document.getElementById('chat-container');
-
-            // 1. Render User Message
-            chatContainer.innerHTML += `
-                <div class="message user-message">
-                    ${message}
-                </div>
-            `;
-            inputField.value = '';
-
-            // 2. Setup Bot Message placeholders
-            const botMessageId = 'bot-' + Date.now();
-            chatContainer.innerHTML += `
-                <div class="message bot-message" id="${botMessageId}">
-                    <details class="thought-process" style="display: none;">
-                        <summary>Thinking Process</summary>
-                        <div class="thought-content"></div>
-                    </details>
-                    <div class="final-answer"></div>
-                </div>
-            `;
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-
-            const botContainer = document.getElementById(botMessageId);
-            const thoughtDetails = botContainer.querySelector('.thought-process');
-            const thoughtContent = botContainer.querySelector('.thought-content');
-            const finalAnswer = botContainer.querySelector('.final-answer');
-
-            let thoughtText = '';
-            let answerText = '';
-
-            // 3. Fetch stream from backend
+            
+            // Add user message to UI
+            addMessageToChat(message, 'user');
+            userInput.value = '';
+            
             try {
                 const response = await fetch('/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: message })
+                    body: JSON.stringify({ message })
                 });
-
+                
                 const reader = response.body.getReader();
-                const decoder = new TextDecoder("utf-8");
+                const decoder = new TextDecoder();
                 let buffer = '';
-
-                // Read the stream chunk by chunk
+                let botMessageContainer = null;
+                
                 while (true) {
                     const { done, value } = await reader.read();
                     if (done) break;
-
+                    
                     buffer += decoder.decode(value, { stream: true });
                     const lines = buffer.split('\n');
-                    buffer = lines.pop(); // Keep incomplete lines in buffer
-
-                    for (let line of lines) {
-                        if (line.startsWith('data: ')) {
-                            const dataStr = line.substring(6);
-                            if (dataStr === '[DONE]') break;
-
+                    buffer = lines.pop();
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
                             try {
-                                const data = JSON.parse(dataStr);
+                                const data = JSON.parse(line.slice(6));
                                 
-                                // Append and render based on chunk type
                                 if (data.type === 'thought') {
-                                    thoughtDetails.style.display = 'block'; // Show thinking UI
-                                    thoughtText += data.content;
-                                    thoughtContent.innerHTML = marked.parse(thoughtText);
+                                    if (!botMessageContainer) {
+                                        botMessageContainer = addMessageToChat('', 'bot');
+                                    }
+                                    addThoughtToMessage(botMessageContainer, data.content);
                                 } else if (data.type === 'text') {
-                                    answerText += data.content;
-                                    finalAnswer.innerHTML = marked.parse(answerText);
+                                    if (!botMessageContainer) {
+                                        botMessageContainer = addMessageToChat('', 'bot');
+                                    }
+                                    addTextToMessage(botMessageContainer, data.content);
                                 }
-                                
-                                chatContainer.scrollTop = chatContainer.scrollHeight;
                             } catch (e) {
-                                console.error("Error parsing stream data:", e);
+                                console.error('Error parsing message:', e);
                             }
                         }
                     }
                 }
             } catch (error) {
-                finalAnswer.innerHTML = "<em>Error connecting to the model.</em>";
+                console.error('Error:', error);
+                addMessageToChat('Error sending message: ' + error.message, 'bot');
             }
         }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        function addMessageToChat(content, role) {
+            const container = document.getElementById('chat-container');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.className = role === 'user' ? 'user-message' : 'bot-message';
+            
+            if (role === 'bot') {
+                contentDiv.innerHTML = marked.parse(content || '');
+            } else {
+                contentDiv.textContent = content;
+            }
+            
+            messageDiv.appendChild(contentDiv);
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+            
+            return contentDiv;
+        }
+
+        function addThoughtToMessage(container, thought) {
+            const thoughtDiv = document.createElement('details');
+            thoughtDiv.className = 'thought-process';
+            thoughtDiv.innerHTML = `<summary>💭 Thought Process</summary><p>${thought}</p>`;
+            container.appendChild(thoughtDiv);
+        }
+
+        function addTextToMessage(container, text) {
+            const p = document.createElement('p');
+            p.innerHTML = marked.parse(text);
+            container.appendChild(p);
+            
+            // Highlight code blocks
+            container.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+        }
+
+        // ============ PR Analysis Functionality ============
+        async function startPRAnalysis() {
+            const prUrl = document.getElementById('pr-url').value.trim();
+            
+            if (!prUrl) {
+                alert('Please enter a PR URL');
+                return;
+            }
+            
+            // Parse PR URL to extract owner, repo, and PR number
+            const urlRegex = /github\.com\/([^\/]+)\/([^\/]+)\/pull\/(\d+)/;
+            const match = prUrl.match(urlRegex);
+            
+            if (!match) {
+                alert('Invalid GitHub PR URL. Expected format: https://github.com/owner/repo/pull/123');
+                return;
+            }
+            
+            const [, owner, repo, prNumber] = match;
+            const resultsContainer = document.getElementById('analysis-results-container');
+            resultsContainer.innerHTML = '<div class="status-message"><span class="spinner"></span> Fetching PR details from GitHub...</div>';
+            
+            const btn = document.getElementById('analyze-btn');
+            btn.disabled = true;
+            
+            try {
+                const response = await fetch('/analyze-pr', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pr_url: prUrl,
+                        owner: owner,
+                        repo: repo,
+                        pr_number: prNumber
+                    })
+                });
+                
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                const results = {
+                    techno_doc: null,
+                    threat_report: null,
+                    mindmap: null
+                };
+                
+                resultsContainer.innerHTML = '';
+                
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    
+                    for (const line of lines) {
+                        if (line.startsWith('data: ') && line !== 'data: [DONE]') {
+                            try {
+                                const data = JSON.parse(line.slice(6));
+                                
+                                if (data.type === 'status') {
+                                    resultsContainer.innerHTML = `<div class="status-message"><span class="spinner"></span> ${data.message}</div>`;
+                                } else if (data.type === 'error') {
+                                    resultsContainer.innerHTML = `<div class="status-message error">❌ ${data.message}</div>`;
+                                } else if (['techno_doc', 'threat_report', 'mindmap'].includes(data.type)) {
+                                    results[data.type] = data;
+                                    displayAnalysisResult(resultsContainer, data.type, data);
+                                }
+                            } catch (e) {
+                                console.error('Error parsing result:', e);
+                            }
+                        }
+                    }
+                }
+                
+                // Show approval section
+                displayApprovalSection(resultsContainer, prNumber, results);
+                
+            } catch (error) {
+                resultsContainer.innerHTML = `<div class="status-message error">❌ Error: ${error.message}</div>`;
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        function displayAnalysisResult(container, type, data) {
+            const typeNames = {
+                'techno_doc': '📄 Technical Documentation',
+                'threat_report': '🛡️ Threat Modeling Report',
+                'mindmap': '🗺️ Mind Map'
+            };
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'analysis-result';
+            
+            const badge = data.is_update ? 
+                '<span class="result-badge badge-update">UPDATED</span>' :
+                '<span class="result-badge badge-new">NEW</span>';
+            
+            resultDiv.innerHTML = `
+                <div class="result-header" onclick="toggleResult(this)">
+                    <span>${typeNames[type]} ${badge}</span>
+                    <span>▼</span>
+                </div>
+                <div class="result-content">
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        ${marked.parse(data.content)}
+                    </div>
+                </div>
+            `;
+            
+            // Apply syntax highlighting
+            resultDiv.querySelectorAll('pre code').forEach(block => {
+                hljs.highlightElement(block);
+            });
+            
+            container.appendChild(resultDiv);
+        }
+
+        function toggleResult(header) {
+            header.classList.toggle('expanded');
+            header.nextElementSibling.classList.toggle('expanded');
+        }
+
+        function displayApprovalSection(container, prNumber, results) {
+            const approvalSection = document.createElement('div');
+            approvalSection.className = 'approval-section show';
+            
+            let checkboxes = '';
+            Object.keys(results).forEach(key => {
+                if (results[key]) {
+                    const typeNames = {
+                        'techno_doc': 'Technical Documentation',
+                        'threat_report': 'Threat Modeling Report',
+                        'mindmap': 'Mind Map'
+                    };
+                    checkboxes += `
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" class="approve-item" value="${key}" checked />
+                                Approve ${typeNames[key]}
+                            </label>
+                        </div>
+                    `;
+                }
+            });
+            
+            approvalSection.innerHTML = `
+                <h4 style="color: #8ab4f8; margin-bottom: 1rem;">Human Intervention</h4>
+                <div style="margin-bottom: 1rem;">
+                    ${checkboxes}
+                </div>
+                <div class="form-group">
+                    <label>Notes (optional)</label>
+                    <textarea id="approval-notes" placeholder="Add any notes about your approval..."></textarea>
+                </div>
+                <div class="approval-buttons">
+                    <button class="approve-btn" onclick="approveChanges('${prNumber}')">✓ Approve</button>
+                    <button class="reject-btn" onclick="rejectChanges('${prNumber}')">✗ Reject</button>
+                </div>
+            `;
+            
+            container.appendChild(approvalSection);
+        }
+
+        async function approveChanges(prNumber) {
+            const approvedItems = Array.from(document.querySelectorAll('.approve-item:checked'))
+                .map(cb => cb.value);
+            const notes = document.getElementById('approval-notes').value;
+            
+            try {
+                const response = await fetch('/approve-changes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pr_number: prNumber,
+                        approved_items: approvedItems,
+                        notes: notes
+                    })
+                });
+                
+                const result = await response.json();
+                alert(`✓ Changes approved for PR #${prNumber}`);
+                document.getElementById('analysis-results-container').innerHTML = 
+                    '<div class="status-message success">✓ Changes have been approved and saved.</div>';
+            } catch (error) {
+                alert('Error approving changes: ' + error.message);
+            }
+        }
+
+        async function rejectChanges(prNumber) {
+            const reason = prompt('Please provide a reason for rejection:');
+            if (!reason) return;
+            
+            try {
+                const response = await fetch('/reject-changes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pr_number: prNumber,
+                        reason: reason
+                    })
+                });
+                
+                const result = await response.json();
+                alert(`Changes rejected. Please provide feedback for regeneration.`);
+                document.getElementById('analysis-results-container').innerHTML = 
+                    '<div class="status-message"><span class="spinner"></span> Waiting for feedback...</div>';
+            } catch (error) {
+                alert('Error rejecting changes: ' + error.message);
+            }
+        }
+
+        // Highlight code on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.highlightAll();
+        });
     </script>
 </body>
 </html>
